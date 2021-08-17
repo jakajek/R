@@ -1,0 +1,37 @@
+library(e1071)
+data("Titanic")
+Titanic_df=as.data.frame(Titanic)
+#Creating data from table
+repeating_sequence=rep.int(seq_len(nrow(Titanic_df)), Titanic_df$Freq) #This will repeat each combination equal to the frequency of each combination
+#Create the dataset by row repetition created
+Titanic_dataset=Titanic_df[repeating_sequence,]
+#We no longer need the frequency, drop the feature
+Titanic_dataset$Freq=NULL
+#Fitting the Naive Bayes model
+Naive_Bayes_Model=naiveBayes(Survived ~., data=Titanic_dataset)
+#What does the model say? Print the model summary
+Naive_Bayes_Model
+#Prediction on the dataset
+NB_Predictions=predict(Naive_Bayes_Model,Titanic_dataset)
+#Confusion matrix to check accuracy
+conf<-table(NB_Predictions,Titanic_dataset$Survived)
+akurasi<-sum(diag(conf)/sum(conf))
+
+## DO BETTER ##
+library(mlr)
+#install.packages("mlr")
+#Create a classification task for learning on Titanic Dataset and specify the target feature
+task = makeClassifTask(data = Titanic_dataset, target = "Survived")
+#Initialize the Naive Bayes classifier
+selected_model = makeLearner("classif.naiveBayes")
+#Train the model
+NB_mlr = train(selected_model, task)
+#Read the model learned  
+NB_mlr$learner.model
+#Predict on the dataset without passing the target feature
+predictions_mlr = as.data.frame(predict(NB_mlr, newdata = Titanic_dataset[,1:3]))
+
+##Confusion matrix to check accuracy
+conf2<-table(predictions_mlr[,1],Titanic_dataset$Survived)
+akurasi2<-sum(diag(conf2)/sum(conf2))
+akurasi2
