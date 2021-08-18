@@ -1,7 +1,7 @@
 library(rtweet)
 twitter_token <- create_token(app = "TEXT MINING - SENTIMENT ANALYSIS", # whatever you named app
-                              consumer_key = "kb84vhMHsxPaqwGIwtcQ9QI11",
-                              consumer_secret = "z4EXyu2biPiljzBP6jFdDAbw82B8J8hkJ1r0LiJo12ttxkAapb")
+                              consumer_key = "consumer token key",
+                              consumer_secret = "consumer sekret key")
 ## LOKASI ##
 bdg<-lookup_coords('bandung, west java', 'country:indonesia')
 jabar<-lookup_coords("west java")
