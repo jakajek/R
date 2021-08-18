@@ -1,0 +1,121 @@
+#panggil data
+wwhs<-read.csv("D:/PASCA UNPAD/SEMESTER 2/TUGAS/ADW/Book32.csv", header = F)
+
+library(Rssa)
+data=wwhs[,1]
+n<-length(data)
+P<-2  			# Periode Musiman Data,hasil pengujian
+insample=data[1:(n-P)]
+n1<-length(insample)
+
+outsample=data[(n-P+1):n]
+outsample
+
+L=30				# Trial And error
+K=n1-L+1
+
+## MAPE MENENTUKAN L ##
+S=ssa(insample, L=L)
+S
+
+## kumulatif (PENGELOMPOKAN SEMENTARA) ##
+total = sum(e.value)
+propv=(e.value/total)
+c1=e.value/total
+c2=cumsum(propv)
+c2 ## DILIHAT SECARA SUBJEKTIF PADA C2 KE BERAPA SUDAH 0.99 ##
+
+forecast=rforecast(S,groups=list(c(1:10),len=2))
+forecast
+##AKURASI PERAMALAN
+residu=outsample - (forecast$F1+forecast$len)
+residu
+MAD=(sum(abs(residu))/(length(outsample)))
+MAD
+MSE=(sum(residu^2)/(length(outsample)))
+MSE
+PEI=(residu/outsample)*100
+MAPE=(sum(abs(PEI)))/(length(outsample))
+MAPE
+
+#1. DEKOMPOSISI
+###EMBEDDING###
+z=as.matrix(insample)
+z
+x=embed(z,L)
+id=1:L
+y=rbind(id,x)
+y
+w=as.matrix(y)
+sort=w[,order(-w[1,])]
+sort
+THankel=as.matrix(sort[-1,(1:L)])
+THankel
+Hankel=t(THankel)
+Hankel
+dim(Hankel)
+
+##SVD##
+trajectory=Hankel%*%t(Hankel)
+dim(trajectory)
+#eigen value
+e.value=eigen(trajectory)$values
+e.value
+#singular value
+sing.value=sqrt(e.value)
+sing.value
+#eigen vector ##untuk penentuan grouping
+e.vector=eigen(trajectory)$vectors
+e.vector
+
+#principal component
+princip.comp=matrix(0,nrow=K,ncol=L)
+V=(t(Hankel)%*%e.vector)
+for (i in 1:L)
+{
+  princip.comp[,i]=V[,i]/sqrt(e.value[i])
+}
+V
+# plot singular value
+S=ssa(insample, L=L)
+S
+
+
+plot(S)
+#plot eigen vector 1D
+plot(S,type="vectors", plot.method="matplot", idx=1:L) #1:berapa mau dilihat
+#plot eigen vector 2D
+plot(S, type="paired", idx=1:(L-1)) #(1:L-1)
+
+#2. REKONSTRUKSI
+###GROUPING###
+r=reconstruct(S,groups=list(Trend=c(1,2,3),Season1=c(4,11,12,15,16),Season2=c(10,17,27,28,6,7,9,25,29,30,13,14,18,19,5,8,23,24,26,20,21,22)),len=2)#ganti groupingnya
+r
+plot(wcor(S,groups=list(Trend=c(1,2,3),Season1=c(4,11,12,15,16),Season2=c(10,17,27,28,6,7,9,25,29,30,13,14,18,19,5,8,23,24,26,20,21,22)),len=2))#ganti groupingnya
+
+###DIAGONAL AVERAGING###
+komponen=cbind(r$Trend,r$Season1,r$Season2) #ganti banyak F sebanyak groupingnya
+komponen
+diagonal.averaging=rowSums(komponen)
+diagonal.averaging
+
+#Linear Recurent Formula (LRF)
+lrr.coef=lrr(S,groups=list(Trend=c(1,2,3),Season1=c(4,11,12,15,16),Season2=c(10,17,27,28,6,7,9,25,29,30,13,14,18,19,5,8,23,24,26,20,21,22)),len=2) #ganti groupingnya
+lrr.coef1=lrr.coef$Trend+lrr.coef$Season1+lrr.coef$Season2+lrr.coef$Season3+lrr.coef$Season4
+lrr.coef1
+
+###RECURRENT FORECASTING###
+forecast=rforecast(S,groups=list(Trend=c(1,2,3),Season1=c(4,11,12,15,16),Season2=c(10,17,27,28,6,7,9,25,29,30,13,14,18,19,5,8,23,24,26,20,21,22)),len=2)
+forecast
+hasil.forecast=forecast$Trend+forecast$Season1+forecast$Season2
+hasil.forecast
+##AKURASI PERAMALAN
+residu=outsample-hasil.forecast
+residu
+MAD=(sum(abs(residu))/(length(outsample)))
+MAD
+MSE=(sum(residu^2)/(length(outsample)))
+MSE
+PEI=(residu/outsample)*100
+MAPE=(sum(abs(PEI)))/(length(outsample))
+MAPE

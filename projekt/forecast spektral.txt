@@ -1,0 +1,401 @@
+
+V1<- c(1: length(Yt))
+V2<-Yt
+U=V1
+ Yt=V2
+ n1=length(U)
+
+ n2=length(Yt)
+ n2
+
+m1=mean(Yt)
+ m1
+
+ sdv=sd(Yt)
+ sdv
+
+plot.ts(Yt)
+ 
+ ###########################
+ ####### Diferensing ##########
+ ### L = PERIODE MUSIMAN #####
+ ###########################
+ L=12
+ d=c()
+ for (i in (L+1):n1)
+ {
+ d[1:L]=0
+ d[i]=Yt[i]-Yt[i-L]
+ }
+ d
+ n3=length(d)-L
+ n3
+
+ sum(d)
+
+ m2=sum(d)/n3
+ m2
+
+ 
+ ###########################
+ ######## Menentukan t #######
+ ###########################
+ t=(U[1]+U[n1])/2
+ t
+
+ ############################
+ ######## Menentukan f ########
+ ############################
+ L=12
+ pi=3.14
+ f=U[n1]/L
+ f
+
+ ############################
+ ####### Menentukan w ########
+ ############################
+ w=(2*pi*f)/U[n1]
+ w
+
+ ############################
+ ###### Menentukan bo ########
+ ############################
+ bo=m2/L
+ bo
+
+ ##########################
+ ###### Menentukan ao #######
+ ##########################
+ ao=m1-bo*t
+ ao
+
+ ###########################
+ ########## Trend ###########
+ ###########################
+ tr=c()
+ for (i in 1:n1)
+ {
+ tr[i]=ao+bo*U[i]
+ }
+ tr
+ 
+ m3=mean(tr)
+ m3
+
+ 
+ 
+ ##########################
+ ######## Detrended #########
+ ##########################
+ dr=c()
+ for (i in 1:n1)
+ {
+ dr[i]=Yt[i]-tr[i]
+ }
+ dr
+ m4=mean(dr)
+ m4
+
+ 
+ ########################
+ ########## cos (wt) #######
+ ########################
+ coswt=c()
+ for (i in 1:n1)
+ {
+ coswt[i]=cos(w*U[i])
+ }
+ coswt
+
+ mc1=mean(coswt)
+ mc1
+
+ #########################
+ ########## sin(wt) #########
+ #########################
+ sinwt=c()
+ for (i in 1:n1)
+ {
+ sinwt[i]=sin(w*U[i])
+ }
+ sinwt
+
+ ms1=mean(sinwt)
+ ms1
+
+ #######################
+ ######## cos(2wt)  #######
+ #######################
+ cos2wt=c()
+ for (i in 1:n1)
+ {
+ cos2wt[i]=cos(2*w*U[i])
+ }
+ cos2wt
+
+ mc2=mean(coswt)
+ mc2
+
+ 
+ #######################
+ ######### sin(2wt) #######
+ #######################
+ sin2wt=c()
+ for (i in 1:n1)
+ {
+ sin2wt[i]=sin(2*w*U[i])
+ }
+ sin2wt
+
+ ms1=mean(sin2wt)
+ ms1
+
+ ###############################
+ #####Menentukan a1(SLOPE) #######
+ ###############################
+ a1 <- lm(dr~coswt)$coef[2]
+ a1
+   coswt 
+ 
+ ###############################
+ ##### Menentukan b1 (SLOPE) #######
+ ################################
+ b1<- lm(dr~sinwt)$coef[2]
+ b1# <------------ Masih salah
+   sinwt 
+ 
+ ###############################
+ ##### Menentukan a2 (SLOPE) #######
+ ###############################
+ a2<- lm(dr~cos2wt)$coef[2] 
+ a2
+  cos2wt 
+ 
+ ################################
+ ##### Menentukan b2 (SLOPE) #######
+ ################################
+ b2<- lm(dr~sin2wt)$coef[2]
+ b2
+   sin2wt 
+ 
+ #############################
+ ######### a1cos (wt) ###########
+ #############################
+ a1coswt=c()
+ for (i in 1:n1)
+ {
+ a1coswt[i]=a1*cos(w*U[i])
+ }
+ a1coswt
+
+ a1mc1=mean(a1coswt)
+ a1mc1
+
+ #############################
+ ######### b1sin(wt) ############
+ #############################
+ b1sinwt=c()
+ for (i in 1:n1)
+ {
+ b1sinwt[i]=b1*sin(w*U[i])
+ }
+ b1sinwt
+
+ b1ms1=mean(b1sinwt)
+ b1ms1
+
+ ############################
+ ######### a2cos(2wt) ##########
+ #############################
+ a2cos2wt=c()
+ for (i in 1:n1)
+ {
+ a2cos2wt[i]=a2*cos(2*w*U[i])
+ }
+ a2cos2wt
+
+ a2mc2=mean(a2cos2wt)
+ a2mc2
+
+ #########################
+ ####### b2sin(2wt) #########
+ #########################
+ b2sin2wt=c()
+ for (i in 1:n1)
+ {
+ b2sin2wt[i]=b2*sin(2*w*U[i])
+ }
+ b2sin2wt
+
+ b2ms1=mean(b2sin2wt)
+ b2ms1
+
+ 
+ ########################
+ ######### AMPLITUDO #####
+ #########################
+ A=c()
+ for (i in 1:n1)
+ {
+ A[i]=a1coswt[i]+b1sinwt[i]+a2cos2wt[i]+b2sin2wt[i]
+ }
+ A
+
+ Am=mean(A)
+ Am
+
+ 
+ ##########################
+ ###### FD = Forecast Data ######
+ ###########################
+ fd<- c()
+ for (i in 1:n1)
+ {
+ fd[i]=tr[i]+A[i]
+ }
+ fd
+ 
+ fdm=mean(fd)
+ fdm
+
+ 
+ ############################
+ ########### Error FD ##########
+ ############################
+ e<- c()
+ for (i in 1:n1)
+ {
+ e[i]=Yt[i]-fd[i]
+ }
+ e
+
+ #############################
+ ######### TABEL KEDUA #########
+ #############################
+g<- n1+1 
+pf=c(g:(g+23))
+ pf
+
+ npf<- length(pf)
+ npf
+
+ #########################
+ ######### TREND ##########
+ #########################
+ trf=c()
+ for (i in 1:npf)
+ {
+ trf[i]=ao+bo*pf[i]
+ }
+ trf
+ ##########################
+ ##### cos (wt) FORECAST ######
+ ##########################
+ coswtf=c()
+ for (i in 1:npf)
+ {
+ coswtf[i]=cos(w*pf[i])
+ }
+ coswtf
+ ##########################
+ ##### sin(wt) FORECAST ######
+ #########################
+ sinwtf=c()
+ for (i in 1:npf)
+ {
+ sinwtf[i]=sin(w*pf[i])
+ }
+ sinwtf
+ ###########################
+ ##### cos(2wt) FORECAST ######
+ ###########################
+ cos2wtf=c()
+ for (i in 1:npf)
+ {
+ cos2wtf[i]=cos(2*w*pf[i])
+ }
+ cos2wtf
+
+ ##########################
+ ##### sin(2wt) FORECAST ######
+ ##########################
+ sin2wtf=c()
+ for (i in 1:npf)
+ {
+ sin2wtf[i]=sin(2*w*pf[i])
+ }
+ sin2wtf
+
+ ##########################
+ ##### a1cos (wt) FORECAST ####
+ ##########################
+ a1coswtf=c()
+ for (i in 1:npf)
+ {
+ a1coswtf[i]=a1*cos(w*pf[i])
+ }
+ a1coswtf
+
+ ############################
+ ##### b1sin(wt) FORECAST #######
+ ############################
+ b1sinwtf=c()
+ for (i in 1:npf)
+ {
+ b1sinwtf[i]=b1*sin(w*pf[i])
+ }
+ b1sinwtf
+
+ ############################
+ ##### a2cos(2wt) FORECAST ######
+ ############################
+ a2cos2wtf=c()
+ for (i in 1:npf)
+ {
+ a2cos2wtf[i]=a2*cos(2*w*pf[i])
+ }
+ a2cos2wtf
+
+ ###########################
+ ##### b2sin(2wt) FORECAST #####
+ ###########################
+ b2sin2wtf=c()
+ for (i in 1:npf)
+ {
+ b2sin2wtf[i]=b2*sin(2*w*pf[i])
+ }
+ b2sin2wtf
+
+ ###############################
+ ######## AMPLITUDO FORECAST #####
+ ################################
+ Af=c()
+ for (i in 1:npf)
+ {
+ Af[i]=a1coswtf[i]+b1sinwtf[i]+a2cos2wtf[i]+b2sin2wtf[i]
+ }
+ Af
+
+ Afm=mean(Af)
+ Afm
+
+ 
+ ######################
+ ######## Forecast #######
+ #######################
+ forecast<- c()
+ for (i in 1:npf)
+ {
+ forecast[i]=trf[i]+Af[i]
+ }
+ forecast
+
+ forecastm=mean(forecast)
+ forecastm
+
+##########################
+errorC4<-y[109:112]-as.numeric(Forecast12[1:4])  ################## 
+MSE=(sum(errorC4^2))/4             ################## 25%
+MAPE =((sum(abs(errorC4)/y[109:112]))/4)*100#########
+
+
