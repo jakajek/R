@@ -1,0 +1,26 @@
+e = mat.or.vec(100,1000)
+x = mat.or.vec(100,1000)
+SNR = mat.or.vec(1,1000)
+y = mat.or.vec(100,1000)
+y1 = mat.or.vec(100,1000)
+xbar = mat.or.vec(100,1)
+ybar = mat.or.vec(100,1)
+for (j in 1:1000){
+	set.seed(j*10^6)
+	e[,j] = rnorm(100,0,0.3)
+	x[,j]= c(seq(1:100))
+	y[,j] = log(x[,j]) + e[,j]	
+	y1[,j] = log(x[,j])
+	SNR[,j] = var(y1[,j])/var(e[,j])
+	}
+mean(SNR)
+plot(x[,1],y[,1])
+lines(ksmooth(x[,1], y[,1], kernel = "normal", bandwidth = 5, range.x=range(x[,1]), x.points=x[,1]), col="red")
+lines(ksmooth(x[,1], y[,1], kernel = "normal", bandwidth = 10, range.x=range(x[,1]), x.points=x[,1]), col="blue")
+lines(ksmooth(x[,1], y[,1], kernel = "normal", bandwidth = 30, range.x=range(x[,1]), x.points=x[,1]), col="yellow")
+
+plot(x[,1000],y[,1000])
+lines(ksmooth(x[,1000], y[,1000], kernel = "normal", bandwidth = 5, range.x=range(x[,1]), x.points=x[,1]), col="red")
+lines(ksmooth(x[,1000], y[,1000], kernel = "normal", bandwidth = 10, range.x=range(x[,1]), x.points=x[,1]), col="red")
+lines(ksmooth(x[,1000], y[,1000], kernel = "normal", bandwidth = 30, range.x=range(x[,1]), x.points=x[,1]), col="yellow")
+
