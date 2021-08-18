@@ -1,0 +1,77 @@
+rm(list=ls())
+rn<-rnorm(1,3,sd=1)
+set.seed(rn*10^6)
+
+library(nlme)
+## SIMULASI GRUP = 5
+NG<-20
+GS<-50
+n<-NG*GS
+s.u1<-0.1
+s.e1<-0.9
+s.u2<-0.2
+s.e2<-0.8
+s.u3<-0.3
+s.e3<-0.7
+
+## TEMPLATE HASIL
+sim1<-c()
+sim2<-c()
+sim3<-c()
+sim4<-c()
+sim5<-c()
+sim6<-c()
+sim7<-c()
+sim8<-c()
+sim9<-c()
+
+## SIMULASI = 27000
+for (i in 1:1000){
+  
+  ##membangkitkan data
+  x<-rnorm(n,0,2)
+  z<-rep(rnorm(NG,0,2))
+  E<-rnorm(n,0,s.e3) ## sigma e ###########
+  u0<-rep(rnorm(NG,0,s.u3)) ## sigma u ####
+  noise<-+rnorm(n,0,7)
+  ef1 <- rep(rnorm(NG,1))
+  efek<-c(rnorm(n,ef1,0.3))
+  y<-x+efek
+  ym<-y+noise
+  grup<-rep(1:NG,each=GS)
+  mydata<-data.frame(y,ym,x,grup,z,E,u0)
+  xrata<-aggregate(mydata$x,list(mydata$grup),mean)
+  names(xrata)<-c("grup","rata.x")
+  dataku<-merge(mydata,xrata,by="grup")
+  
+  ##Pilihan analisis fm1 fm2 fm3
+  fm1<-lme(y~x,mydata,~1|grup)
+  fm2<-lme(ym~x,mydata,~1|grup)
+  fm3<-lme(y~x+rata.x,dataku,~1|grup)
+  
+  ## OUTPUT HASIL
+  sim1<-c(sim1,VarCorr(fm1)[2,1])
+  sim2<-c(sim2,VarCorr(fm2)[2,1])
+  sim3<-c(sim3,VarCorr(fm3)[2,1])
+  sim4<-c(sim4,fm1$coefficients$fixed[1])
+  sim5<-c(sim5,fm2$coefficients$fixed[1])
+  sim6<-c(sim6,fm3$coefficients$fixed[1])
+  sim7<-c(sim7,fm1$coefficients$fixed[2])
+  sim8<-c(sim8,fm2$coefficients$fixed[2])
+  sim9<-c(sim9,fm3$coefficients$fixed[2])
+}
+
+rataU0 <- mean(u0)
+rataX <- mean(x)
+rataZ <- mean(z)
+rataE <- mean(E)
+Int1 <- as.numeric(VarCorr(fm1)[1,1])
+Int2 <- as.numeric(VarCorr(fm2)[1,1])
+
+c(rataU0, rataE, Int1, Int2, rataX, rataZ)
+
+##menampilkan output
+layout(matrix(c(1,2,3),1,3),TRUE)
+hist(as.numeric(sim4),xlab="Intersep",main="Tanpa Korelasi")
+hist(as.numeric(sim5),xlab="Intersep",main="Dengan Korelasi")
+hist(as.numeric(sim6),xlab="Intersep",main="Dengan Korelasi Dikontrol")
