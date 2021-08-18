@@ -2,7 +2,7 @@ library(readxl)
 library(dplyr)
 
 # import data
-data_piloting<-read_xlsx("D:/Arna Ramadhan/Project/BAN PAUD/PILOTING_2020-SAMPLING.xlsx",
+data_piloting<-read_xlsx("D:/xxx/PILOTING_2020-SAMPLING.xlsx",
                          sheet="AKRE 18-19",col_names=TRUE)
 
 str(data_piloting)
